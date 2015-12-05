@@ -1,15 +1,22 @@
 ﻿namespace Santase.AI.NinjaPlayer.Helpers
 {
-    using Logic.Players;
-    using Logic.Cards;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+
+    using Logic.Players;
+    using Logic.Cards;
+    using Logic.PlayerActionValidate;
+    using Logic;
 
     public class CardValidator
     {
+        private readonly IAnnounceValidator announceValidator;
+
+        public CardValidator(IAnnounceValidator announceValidator)
+        {
+            this.announceValidator = announceValidator;
+        }
+
         public bool HasNonTrumpCardType(PlayerTurnContext context, ICollection<Card> cards, CardType type)
         {
             return cards.Any(x => x.Suit != context.TrumpCard.Suit && x.Type == type);
@@ -44,6 +51,12 @@
         public bool IsTrump(Card card, CardType trumpCardType)
         {
             return card.Type == trumpCardType;
+        }
+
+        public bool HasAnnounce(PlayerTurnContext context, Card card, ICollection<Card> cards, Announce announce)
+        {
+            return card.Type == CardType.Queen
+                    && this.announceValidator.GetPossibleAnnounce(cards, card, context.TrumpCard) == announce;
         }
     }
 }

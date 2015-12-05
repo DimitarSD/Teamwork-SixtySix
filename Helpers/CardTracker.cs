@@ -12,15 +12,16 @@
     {
         private readonly ICollection<Card> remainingCards;
         private readonly ICollection<Card> playedCards;
+        private readonly ICollection<Card> myRemainingTrumpCards;
 
         public CardTracker()
         {
             this.MySureTrickPoints = 0;
             this.remainingCards = new List<Card>();
-            this.playedCards = new List<Card>();
+            this.playedCards = new HashSet<Card>();
+            this.myRemainingTrumpCards = new List<Card>();
             this.MyTrickPoints = 0;
             this.OpponentsTrickPoints = 0;
-            this.GetFullDeck();
         }
 
         public int OpponentsTrickPoints { get; set; }
@@ -29,11 +30,32 @@
 
         public int MySureTrickPoints { get; set; }
 
+        public CardSuit TrumpSuit { get; set; }
+
+        public ICollection<Card> MyRemainingTrumpCards
+        {
+            get
+            {
+                return this.myRemainingTrumpCards;
+            }
+        }
+
         public ICollection<Card> RemainingCards
         {
             get
             {
                 return this.remainingCards;
+            }
+        }
+
+        public void GetMyRemainingTrumpCards(ICollection<Card> myCards)
+        {
+            foreach (var card in myCards)
+            {
+                if(card.Suit == this.TrumpSuit)
+                {
+                    this.myRemainingTrumpCards.Add(card);
+                }
             }
         }
 
@@ -76,6 +98,35 @@
             this.playedCards.Add(card);
         }
 
+        public Card FindPlayedCard(CardType type, CardSuit suit)
+        {
+            return this.playedCards.FirstOrDefault(c => c.Type == type && c.Suit == suit);
+        }
+
+        public int CountPlayedCardsInSuit(CardSuit suit)
+        {
+            var counter = 0;
+            foreach (var card in this.playedCards)
+            {
+                if (card.Suit == suit)
+                {
+                    counter++;
+                }
+            }
+
+            return counter;
+        }
+
+        public void ClearRemainingCards()
+        {
+            this.remainingCards.Clear();
+        }
+
+        public void ClearMyRemainingTrumpCards()
+        {
+            this.myRemainingTrumpCards.Clear();
+        }
+
         //private void GetFullSuit(CardSuit suit)
         //{
         //    foreach (CardType type in Enum.GetValues(typeof(CardType)))
@@ -84,7 +135,7 @@
         //    }
         //}
 
-        private void GetFullDeck()
+        public void GetFullDeck()
         {
             foreach (CardSuit suit in Enum.GetValues(typeof(CardSuit)))
             {

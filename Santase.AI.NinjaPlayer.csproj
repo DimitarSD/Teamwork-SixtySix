@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Include="Helpers\CardTracker.cs" />
     <Compile Include="Helpers\CardValidator.cs" />
-    <Compile Include="NinjaPlayer - Copy.cs" />
     <Compile Include="NinjaPlayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
