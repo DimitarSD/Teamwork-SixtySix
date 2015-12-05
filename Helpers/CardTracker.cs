@@ -103,6 +103,11 @@
             return this.playedCards.FirstOrDefault(c => c.Type == type && c.Suit == suit);
         }
 
+        public Card FindRemainingCard(CardType type, CardSuit suit)
+        {
+            return this.remainingCards.FirstOrDefault(c => c.Type == type && c.Suit == suit);
+        }
+
         public int CountPlayedCardsInSuit(CardSuit suit)
         {
             var counter = 0;

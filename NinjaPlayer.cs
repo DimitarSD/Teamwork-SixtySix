@@ -95,8 +95,6 @@
             return shouldCloseGame;
         }
 
-        // TODO: count cards
-        // TODO: count points
         private PlayerAction ChooseCard(PlayerTurnContext context)
         {
             // game not closed
@@ -147,7 +145,7 @@
                     .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
             }
 
-            if(this.cardTracker.MyTrickPoints >= 50 && this.cardValidator.HasTrumpCardType(context, this.possibleCardsToPlay, CardType.Ace))
+            if (this.cardTracker.MyTrickPoints >= 50 && (this.cardValidator.HasTrumpCardType(context, this.possibleCardsToPlay, CardType.Ace)))
             {
                 card = this.possibleCardsToPlay
                     .OrderByDescending(c => c.GetValue())
@@ -167,29 +165,132 @@
 
         private PlayerAction ChooseCardWhenSecondAndGameNotClosed(PlayerTurnContext context)
         {
-            // TODO: check for announce when playing card
-
             Card card;
             // if firstPlayed card is not trump and we have a higher card of the same suit => play highest card
-            if (!this.cardValidator.IsTrump(context.FirstPlayedCard, context.TrumpCard.Type))
+            if (!this.cardValidator.IsTrump(context.FirstPlayedCard, this.cardTracker.TrumpSuit))
             {
+                // TODO: when 1 card left in deck - let him win?
                 if (this.cardValidator.HasHigherCard(context.FirstPlayedCard, this.possibleCardsToPlay))
                 {
                     // play higher card
                     card = possibleCardsToPlay
                         .Select(c => this.GetHigherCard(context.FirstPlayedCard)).FirstOrDefault();
+
+                    if (!this.cardValidator.HasAnnounce(context, card, this.possibleCardsToPlay, Announce.Twenty))
+                    {
+                        return this.PlayCard(card);
+                    }
                 }
                 else
                 {
+                    if (this.GetAnnounce(context, Announce.Twenty) != null && this.cardTracker.MyTrickPoints + context.FirstPlayedCard.GetValue() >= 40)
+                    {
+                        card = possibleCardsToPlay
+                            .OrderByDescending(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+                    }
+
+                    if (this.GetAnnounce(context, Announce.Twenty) != null && this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() >= 50)
+                    {
+                        card = possibleCardsToPlay
+                            .OrderByDescending(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+                    }
+
+                    if (this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() >= 50)
+                    {
+                        card = possibleCardsToPlay
+                            .OrderByDescending(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+                    }
+
                     if (this.cardValidator.IsTenOrAce(context.FirstPlayedCard) && this.cardValidator.HasTrumpCard(context, this.possibleCardsToPlay))
                     {
+                        card = possibleCardsToPlay
+                            .OrderByDescending(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (this.cardTracker.MyTrickPoints >= 66 - (context.FirstPlayedCard.GetValue() + card.GetValue()))
+                        {
+                            return this.PlayCard(card);
+                        }
+
                         // play smallest trump
+                        card = possibleCardsToPlay
+                            .OrderBy(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && c.Type == CardType.Jack);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+
+                        card = possibleCardsToPlay
+                            .OrderBy(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && context.TrumpCard.Type == CardType.Jack && c.Type == CardType.Nine);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+
+                        card = possibleCardsToPlay
+                            .OrderBy(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && (c.Type == CardType.Queen
+                            && this.cardTracker.FindPlayedCard(CardType.King, this.cardTracker.TrumpSuit) != null)
+                            || (c.Type == CardType.King
+                            && this.cardTracker.FindPlayedCard(CardType.Queen, this.cardTracker.TrumpSuit) != null));
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+
+                        card = possibleCardsToPlay
+                            .OrderBy(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && c.GetValue() >= 10);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+
                         card = this.GetSmallestTrumpCard();
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
                     }
                     else
                     {
+                        card = possibleCardsToPlay
+                            .OrderByDescending(c => c.GetValue())
+                            .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (card != null && this.cardTracker.MyTrickPoints >= 66 - (context.FirstPlayedCard.GetValue() + card.GetValue()))
+                        {
+                            return this.PlayCard(card);
+                        }
+
                         // play smallest card
                         card = this.GetSmallestCard();
+                        return this.PlayCard(card);
                     }
                 }
             }
@@ -199,6 +300,14 @@
                 card = this.GetSmallestNonTrumpCard();
             }
 
+            // play smallest non-trump card
+            card = this.GetSmallestNonTrumpCard();
+            if (card != null)
+            {
+                return this.PlayCard(card);
+            }
+
+            card = this.GetSmallestCard();
             return this.PlayCard(card);
         }
 
@@ -270,19 +379,40 @@
 
         private PlayerAction ChooseCardWhenSecondAndGameClosed(PlayerTurnContext context)
         {
-            //TODO: check for announce when playing card
-            // play smallest non-trump card
-            var asd = this.possibleCardsToPlay;
             Card card;
-
-            card = this.GetHigherCard(context.FirstPlayedCard);
-
-            if (card != null && (!this.cardValidator.HasAnnounce(context, card, this.possibleCardsToPlay, Announce.Twenty)
-               || !this.cardValidator.HasAnnounce(context, card, this.possibleCardsToPlay, Announce.Forty)))
+            if (!this.cardValidator.IsTrump(context.FirstPlayedCard, this.cardTracker.TrumpSuit))
             {
-                return this.PlayCard(card);
-            }
+                card = this.GetHigherCard(context.FirstPlayedCard);
 
+                if (card != null && !this.cardValidator.HasAnnounce(context, card, this.possibleCardsToPlay, Announce.Twenty))
+                {
+                    return this.PlayCard(card);
+                }
+            }
+            else
+            {
+                if (context.CardsLeftInDeck == 0)
+                {
+                    if (context.FirstPlayedCard.Type != CardType.Ace && this.cardTracker.FindRemainingCard(CardType.Ace, this.cardTracker.TrumpSuit) != null)
+                    {
+                        card = this.possibleCardsToPlay.FirstOrDefault(c => c.Type == CardType.Ten && c.Suit == this.cardTracker.TrumpSuit);
+
+                        if (card != null)
+                        {
+                            return this.PlayCard(card);
+                        }
+                    }
+                }
+
+                card = this.GetHigherCard(context.FirstPlayedCard);
+
+                if (card != null && !this.cardValidator.HasAnnounce(context, card, this.possibleCardsToPlay, Announce.Forty))
+                {
+                    return this.PlayCard(card);
+                }
+            }
+ 
+            // play smallest non-trump card
             card = this.GetSmallestNonTrumpCard();
 
             if (card != null)

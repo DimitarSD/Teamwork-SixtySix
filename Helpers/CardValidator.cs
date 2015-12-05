@@ -48,9 +48,9 @@
             return card.GetValue() >= 10;
         }
 
-        public bool IsTrump(Card card, CardType trumpCardType)
+        public bool IsTrump(Card card, CardSuit trumpCardSuit)
         {
-            return card.Type == trumpCardType;
+            return card.Suit == trumpCardSuit;
         }
 
         public bool HasAnnounce(PlayerTurnContext context, Card card, ICollection<Card> cards, Announce announce)
