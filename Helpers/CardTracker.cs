@@ -7,12 +7,15 @@
     using System.Threading.Tasks;
     using Logic.Cards;
     using Logic.Players;
+    using Logic;
 
     public class CardTracker
     {
         private readonly ICollection<Card> remainingCards;
         private readonly ICollection<Card> playedCards;
         private readonly ICollection<Card> myRemainingTrumpCards;
+        private readonly ICollection<Card> mySureCards;
+        private readonly CardValidator cardValidator;
 
         public CardTracker()
         {
@@ -20,8 +23,10 @@
             this.remainingCards = new List<Card>();
             this.playedCards = new HashSet<Card>();
             this.myRemainingTrumpCards = new List<Card>();
+            this.mySureCards = new List<Card>();
             this.MyTrickPoints = 0;
             this.OpponentsTrickPoints = 0;
+            this.cardValidator = new CardValidator();
         }
 
         public int OpponentsTrickPoints { get; set; }
@@ -47,6 +52,15 @@
                 return this.remainingCards;
             }
         }
+
+        public ICollection<Card> MySureCards
+        {
+            get
+            {
+                return this.mySureCards;
+            }
+        }
+
 
         public void GetMyRemainingTrumpCards(ICollection<Card> myCards)
         {
@@ -75,6 +89,58 @@
             {
                 this.remainingCards.Remove(trumpCard);
             }
+        }
+
+        public void GetSureCardsWhenGameClosed(PlayerTurnContext context, ICollection<Card> cards, bool deckHasCards = true)
+        {
+            foreach (var myCard in cards)
+            {
+                var opponentsCardsInSuit = this.GetOpponentsCardInSuit(myCard.Suit);
+
+                if (this.cardValidator.IsCardInAnnounce(context, myCard, cards, Announce.Forty)
+                    || this.cardValidator.IsCardInAnnounce(context, myCard, cards, Announce.Twenty))
+                {
+                    continue;
+                }
+
+                if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards)
+                    && opponentsCardsInSuit.Count == 0 && myCard.Suit != this.TrumpSuit)
+                {
+                    mySureCards.Add(myCard);
+                }
+
+                foreach (var opponetCard in opponentsCardsInSuit)
+                {
+                    if (myCard.GetValue() < opponetCard.GetValue())
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        if (deckHasCards)
+                        {
+                            if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards))
+                            {
+                                this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
+                                mySureCards.Add(myCard);
+                            }
+                        }
+                        else
+                        {
+                            this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
+                            mySureCards.Add(myCard);
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        private ICollection<Card> GetOpponentsCardInSuit(CardSuit suit)
+        {
+            return this.RemainingCards.Where(c => c.Suit == suit)
+                .OrderByDescending(c => c.GetValue()).ToList();
         }
 
         public void GetTrickPoints(PlayerTurnContext context)
@@ -135,6 +201,11 @@
         public void ClearMyRemainingTrumpCards()
         {
             this.myRemainingTrumpCards.Clear();
+        }
+
+        public void ClearMySureCards()
+        {
+            this.mySureCards.Clear();
         }
 
         //private void GetFullSuit(CardSuit suit)
