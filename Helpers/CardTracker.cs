@@ -108,6 +108,11 @@
             return this.remainingCards.FirstOrDefault(c => c.Type == type && c.Suit == suit);
         }
 
+        public Card FindMyRemainingTrumpCard(CardType type)
+        {
+            return this.MyRemainingTrumpCards.FirstOrDefault(c => c.Type == type);
+        }
+
         public int CountPlayedCardsInSuit(CardSuit suit)
         {
             var counter = 0;
