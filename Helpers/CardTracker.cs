@@ -66,7 +66,7 @@
         {
             foreach (var card in myCards)
             {
-                if(card.Suit == this.TrumpSuit)
+                if (card.Suit == this.TrumpSuit)
                 {
                     this.myRemainingTrumpCards.Add(card);
                 }
@@ -96,30 +96,49 @@
             var sureCards = new List<Card>();
             foreach (var myCard in cards)
             {
-                var opponentsCardsInSuit = this.GetOpponentsCardInSuit(myCard.Suit);
-
+                // if card is part of an announce => skip it
                 if (this.cardValidator.IsCardInAnnounce(context, myCard, cards, Announce.Forty)
                     || this.cardValidator.IsCardInAnnounce(context, myCard, cards, Announce.Twenty))
                 {
                     continue;
                 }
 
+                // if opponent has no trump cards & no cards of myCard's suit & myCard is not trump => sure card
+                var opponentsCardsInSuit = this.RemainingCards.Where(c => c.Suit == myCard.Suit)
+                    .OrderByDescending(c => c.GetValue()).ToList();
+
                 if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards)
-                    && opponentsCardsInSuit.Count == 0 && myCard.Suit != this.TrumpSuit)
+                    && opponentsCardsInSuit.Count == 0) //&& myCard.Suit != this.TrumpSuit - TODO: check
+                {
+                    sureCards.Add(myCard);
+                }
+
+                // add trump ace
+                if (deckHasCards && myCard.Type == CardType.Ace && myCard.Suit == this.TrumpSuit)
+                {
+                    sureCards.Add(myCard);
+                }
+
+                // add trump ten if ace is played or in player
+                if (deckHasCards && myCard.Type == CardType.Ten && myCard.Suit == this.TrumpSuit 
+                    && (this.FindPlayedCard(CardType.Ace, this.TrumpSuit) != null || this.FindMyRemainingTrumpCard(CardType.Ace) != null))
                 {
                     sureCards.Add(myCard);
                 }
 
                 foreach (var opponetCard in opponentsCardsInSuit)
                 {
-                    if (myCard.GetValue() < opponetCard.GetValue())
+                    // if opponent has any higher card in that suit 
+                    if (opponentsCardsInSuit.Any(c => c.GetValue() > myCard.GetValue()))
                     {
                         break;
                     }
-                    else
+
+                    if (myCard.GetValue() > opponetCard.GetValue())
                     {
                         if (deckHasCards)
                         {
+                            // if game is closed but deck is not empty => add card if opponent has no trump cards || if it's top trumps
                             if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards))
                             {
                                 this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
@@ -128,6 +147,7 @@
                         }
                         else
                         {
+                            // if deck is empty => sure card
                             this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
                             sureCards.Add(myCard);
                         }
@@ -138,12 +158,6 @@
             }
 
             return sureCards;
-        }
-
-        private ICollection<Card> GetOpponentsCardInSuit(CardSuit suit)
-        {
-            return this.RemainingCards.Where(c => c.Suit == suit)
-                .OrderByDescending(c => c.GetValue()).ToList();
         }
 
         public void GetTrickPoints(PlayerTurnContext context)

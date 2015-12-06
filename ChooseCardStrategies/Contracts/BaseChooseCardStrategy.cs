@@ -1,10 +1,7 @@
 ﻿namespace Santase.AI.NinjaPlayer.ChooseCardStrategies.Contracts
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Logic.Players;
     using Logic.Cards;
     using Helpers;
@@ -33,14 +30,14 @@
 
         protected Card GetSmallestNonTrumpCard()
         {
-            return possibleCardsToPlay
+            return this.possibleCardsToPlay
                 .OrderBy(c => c.GetValue())
                 .FirstOrDefault(c => c.Suit != this.cardTracker.TrumpSuit);
         }
 
         protected Card GetSmallestNonAnnounceNonTrumpCard(PlayerTurnContext context)
         {
-            return possibleCardsToPlay
+            return this.possibleCardsToPlay
                 .OrderBy(c => c.GetValue())
                 .FirstOrDefault(c => c.Suit != this.cardTracker.TrumpSuit
                 && !this.cardValidator.IsCardInAnnounce(context, c, this.possibleCardsToPlay, Announce.Twenty));
@@ -72,6 +69,21 @@
         {
             return this.possibleCardsToPlay.OrderByDescending(c => c.GetValue())
                 .FirstOrDefault(c => c.Suit == firstPlayedCard.Suit && c.GetValue() > firstPlayedCard.GetValue());
+        }
+
+        protected Card GetHighestCardInSuit(ICollection<Card> cards, CardSuit suit)
+        {
+            return cards.OrderByDescending(c => c.GetValue())
+                .FirstOrDefault(c => c.Suit == suit);
+        }
+
+        protected CardSuit GetOpponentsShortestSuit()
+        {
+            return this.cardTracker.RemainingCards
+                .GroupBy(x => x.Suit)
+                .OrderBy(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault(s => s != this.cardTracker.TrumpSuit);
         }
 
         protected PlayerAction AnnounceMarriage(PlayerTurnContext context, ICollection<Card> cards)
