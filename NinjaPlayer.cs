@@ -70,7 +70,7 @@
                 return this.CloseGame();
             }
 
-            var strategy = this.GetStrategy(context);
+            var strategy = this.GetChooseCardStrategy(context);
             return strategy.ChooseCard(context, this.Cards);
         }
 
@@ -91,14 +91,14 @@
         public override void EndTurn(PlayerTurnContext context)
         {
             this.cardTracker.ClearMyRemainingTrumpCards();
-            this.cardTracker.ClearMySureCards();
+            //this.cardTracker.ClearMySureCards();
             this.cardTracker.AddPlayedCard(context.FirstPlayedCard);
             this.cardTracker.AddPlayedCard(context.SecondPlayedCard);
         }
 
         private bool ShouldCloseGame(PlayerTurnContext context)
         {
-            this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay);
+            //this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay);
 
             bool isCloseGameValid = this.PlayerActionValidator.IsValid(PlayerAction.CloseGame(), context, this.Cards);
             bool hasFiveTrumpCards = this.Cards.Count(x => x.Suit == context.TrumpCard.Suit) == 5;
@@ -112,7 +112,7 @@
                 && (this.cardValidator.HasTrumpCardType(context, this.Cards, CardType.Ace) && this.cardValidator.HasTrumpCardType(context, this.Cards, CardType.Ten)
                 || hasFourTrumpCards
                 || this.cardTracker.MyTrickPoints >= 20 && this.cardValidator.HasTrumpCardType(context, this.Cards, CardType.Ace)
-                || this.cardTracker.MySureCards.Count > 2);
+                || this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay).Count > 2);
 
             //TODO: add more logic
 
@@ -121,7 +121,7 @@
             return shouldCloseGame;
         }
 
-        private IChooseCardStrategy GetStrategy(PlayerTurnContext context)
+        private IChooseCardStrategy GetChooseCardStrategy(PlayerTurnContext context)
         {
             // game not closed
             if (!context.State.ShouldObserveRules)

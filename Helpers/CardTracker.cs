@@ -14,7 +14,7 @@
         private readonly ICollection<Card> remainingCards;
         private readonly ICollection<Card> playedCards;
         private readonly ICollection<Card> myRemainingTrumpCards;
-        private readonly ICollection<Card> mySureCards;
+        //private readonly ICollection<Card> mySureCards;
         private readonly CardValidator cardValidator;
 
         public CardTracker()
@@ -23,7 +23,7 @@
             this.remainingCards = new List<Card>();
             this.playedCards = new HashSet<Card>();
             this.myRemainingTrumpCards = new List<Card>();
-            this.mySureCards = new List<Card>();
+            //this.mySureCards = new List<Card>();
             this.MyTrickPoints = 0;
             this.OpponentsTrickPoints = 0;
             this.cardValidator = new CardValidator();
@@ -53,13 +53,13 @@
             }
         }
 
-        public ICollection<Card> MySureCards
-        {
-            get
-            {
-                return this.mySureCards;
-            }
-        }
+        //public ICollection<Card> MySureCards
+        //{
+        //    get
+        //    {
+        //        return this.mySureCards;
+        //    }
+        //}
 
 
         public void GetMyRemainingTrumpCards(ICollection<Card> myCards)
@@ -91,8 +91,9 @@
             }
         }
 
-        public void GetSureCardsWhenGameClosed(PlayerTurnContext context, ICollection<Card> cards, bool deckHasCards = true)
+        public ICollection<Card> GetSureCardsWhenGameClosed(PlayerTurnContext context, ICollection<Card> cards, bool deckHasCards = true)
         {
+            var sureCards = new List<Card>();
             foreach (var myCard in cards)
             {
                 var opponentsCardsInSuit = this.GetOpponentsCardInSuit(myCard.Suit);
@@ -106,7 +107,7 @@
                 if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards)
                     && opponentsCardsInSuit.Count == 0 && myCard.Suit != this.TrumpSuit)
                 {
-                    mySureCards.Add(myCard);
+                    sureCards.Add(myCard);
                 }
 
                 foreach (var opponetCard in opponentsCardsInSuit)
@@ -122,19 +123,21 @@
                             if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards))
                             {
                                 this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
-                                mySureCards.Add(myCard);
+                                sureCards.Add(myCard);
                             }
                         }
                         else
                         {
                             this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
-                            mySureCards.Add(myCard);
+                            sureCards.Add(myCard);
                         }
 
                         break;
                     }
                 }
             }
+
+            return sureCards;
         }
 
         private ICollection<Card> GetOpponentsCardInSuit(CardSuit suit)
@@ -203,10 +206,10 @@
             this.myRemainingTrumpCards.Clear();
         }
 
-        public void ClearMySureCards()
-        {
-            this.mySureCards.Clear();
-        }
+        //public void ClearMySureCards()
+        //{
+        //    this.mySureCards.Clear();
+        //}
 
         //private void GetFullSuit(CardSuit suit)
         //{

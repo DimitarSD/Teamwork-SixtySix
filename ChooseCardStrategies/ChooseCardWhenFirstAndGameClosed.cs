@@ -24,9 +24,8 @@
             }
             else
             {
-                this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay);
-                var sureCards = this.cardTracker.MySureCards;
-
+                var sureCards = this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay);
+                //var asd = this.cardTracker.RemainingCards;
                 if (sureCards.Count > 0)
                 {
                     card = sureCards.First();
@@ -85,9 +84,8 @@
         private PlayerAction ChooseCardWhenFirstAndNoCardsInDeck(PlayerTurnContext context, ICollection<Card> cards)
         {
             Card card;
-            this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay, false);
-            var sureCards = this.cardTracker.MySureCards;
-
+            var sureCards = this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay, false);
+            //var asd = this.cardTracker.RemainingCards;
             if (sureCards.Count > 0)
             {
                 card = sureCards.First();
