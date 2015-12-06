@@ -12,6 +12,11 @@
     {
         private readonly IAnnounceValidator announceValidator;
 
+        public CardValidator()
+            : this(new AnnounceValidator())
+        {
+        }
+
         public CardValidator(IAnnounceValidator announceValidator)
         {
             this.announceValidator = announceValidator;
@@ -53,7 +58,20 @@
             return card.Suit == trumpCardSuit;
         }
 
-        public bool HasAnnounce(PlayerTurnContext context, Card card, ICollection<Card> cards, Announce announce)
+        public bool HasAnnounce(PlayerTurnContext context, Announce announce, ICollection<Card> cards)
+        {
+            foreach (var card in cards)
+            {
+                if (this.IsCardInAnnounce(context, card, cards, announce))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsCardInAnnounce(PlayerTurnContext context, Card card, ICollection<Card> cards, Announce announce)
         {
             return card.Type == CardType.Queen
                     && this.announceValidator.GetPossibleAnnounce(cards, card, context.TrumpCard) == announce;
