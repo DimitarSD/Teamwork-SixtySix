@@ -94,6 +94,9 @@
         public ICollection<Card> GetSureCardsWhenGameClosed(PlayerTurnContext context, ICollection<Card> cards, bool deckHasCards = true)
         {
             var sureCards = new List<Card>();
+            cards = cards.OrderByDescending(c => c.GetValue()).ToList();
+            var opponentsCards = this.RemainingCards.OrderByDescending(c => c.GetValue()).ToList();
+
             foreach (var myCard in cards)
             {
                 // if card is part of an announce => skip it
@@ -104,7 +107,7 @@
                 }
 
                 // if opponent has no trump cards & no cards of myCard's suit & myCard is not trump => sure card
-                var opponentsCardsInSuit = this.RemainingCards.Where(c => c.Suit == myCard.Suit)
+                var opponentsCardsInSuit = opponentsCards.Where(c => c.Suit == myCard.Suit)
                     .OrderByDescending(c => c.GetValue()).ToList();
 
                 if (!this.cardValidator.HasTrumpCard(context, this.RemainingCards)
@@ -150,6 +153,7 @@
                             // if deck is empty => sure card
                             this.MySureTrickPoints += (myCard.GetValue() + opponetCard.GetValue());
                             sureCards.Add(myCard);
+                            opponentsCards.Remove(opponetCard);
                         }
 
                         break;

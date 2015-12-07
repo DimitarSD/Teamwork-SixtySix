@@ -26,6 +26,13 @@
                 {
                     return this.PlayCard(cards, card);
                 }
+
+                // play high trump to win the round
+                card = this.GetHighestCardInSuit(this.possibleCardsToPlay, this.cardTracker.TrumpSuit);
+                if (card != null && this.cardTracker.MyTrickPoints >= 66 - (context.FirstPlayedCard.GetValue() + card.GetValue()))
+                {
+                    return this.PlayCard(cards, card);
+                }
             }
             else
             {
