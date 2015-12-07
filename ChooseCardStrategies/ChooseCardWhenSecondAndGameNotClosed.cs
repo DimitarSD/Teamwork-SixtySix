@@ -21,8 +21,6 @@
             // if firstPlayed card is not trump and we have a higher card of the same suit => play highest card
             if (!this.cardValidator.IsTrump(context.FirstPlayedCard, this.cardTracker.TrumpSuit))
             {
-                // TODO: when 1 card left in deck - let him win?
-
                 // play higher card
                 card = this.GetHigherCard(context.FirstPlayedCard);
                 if (card != null && !this.cardValidator.IsCardInAnnounce(context, card, this.possibleCardsToPlay, Announce.Twenty))
@@ -65,19 +63,20 @@
                     }
                 }
 
-                //todo: check if it chould be done && check for possible 40
-                if (context.CardsLeftInDeck == 2 && (context.TrumpCard.Type != CardType.Ace || context.TrumpCard.Type != CardType.Ten))
-                {
-                    // try to win so player is first when closed
-                    card = this.possibleCardsToPlay.OrderBy(c => c.GetValue())
-                        .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit
-                        && !this.cardValidator.IsCardInAnnounce(context, c, this.possibleCardsToPlay, Announce.Forty));
+                //// TODO: when 1 card left in deck - let him win?
+                ////todo: check if it chould be done && check for possible 40
+                //if (context.CardsLeftInDeck == 2 && (context.TrumpCard.Type != CardType.Ace || context.TrumpCard.Type != CardType.Ten))
+                //{
+                //    // try to win so player is first when closed
+                //    card = this.possibleCardsToPlay.OrderBy(c => c.GetValue())
+                //        .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit
+                //        && !this.cardValidator.IsCardInAnnounce(context, c, this.possibleCardsToPlay, Announce.Forty));
 
-                    if (card != null)
-                    {
-                        return this.PlayCard(cards, card);
-                    }
-                }
+                //    if (card != null)
+                //    {
+                //        return this.PlayCard(cards, card);
+                //    }
+                //}
 
                 //// TODO: check if this should be done
                 //// if player can have forty by changing trump
@@ -141,13 +140,9 @@
                     // play 9 if Jack is trump or there are two cards left in deck
                     card = possibleCardsToPlay
                         .OrderBy(c => c.GetValue())
-                        .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && c.Type == CardType.Nine
-                        && (context.TrumpCard.Type == CardType.Jack
-                        || (context.CardsLeftInDeck == 2 && context.TrumpCard.GetValue() < 10
-                        && ((context.TrumpCard.Type == CardType.Queen && this.cardValidator.HasTrumpCardType(context, cards, CardType.King)
-                        || (context.TrumpCard.Type == CardType.King && this.cardValidator.HasTrumpCardType(context, cards, CardType.Queen)))))));
+                        .FirstOrDefault(c => c.Suit == this.cardTracker.TrumpSuit && c.Type == CardType.Nine);
 
-                    if (card != null)
+                    if (card != null && (context.TrumpCard.Type == CardType.Jack || context.CardsLeftInDeck == 2))
                     {
                         return this.PlayCard(cards, card);
                     }
@@ -192,7 +187,6 @@
                 //    card = this.GetSmallestCard();
                 //    return this.PlayCard(cards, card);
                 //}
-
             }
             else
             {
