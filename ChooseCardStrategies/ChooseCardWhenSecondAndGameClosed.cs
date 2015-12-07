@@ -29,16 +29,13 @@
 
                 // play high trump to win the round
                 card = this.GetHighestCardInSuit(this.possibleCardsToPlay, this.cardTracker.TrumpSuit);
-                if (card != null && this.cardTracker.MyTrickPoints >= 66 - (context.FirstPlayedCard.GetValue() + card.GetValue()))
+                if (card != null && this.cardTracker.MyTrickPoints >= GlobalConstants.EnoughPointsToWinGame - (context.FirstPlayedCard.GetValue() + card.GetValue()))
                 {
                     return this.PlayCard(cards, card);
                 }
             }
             else
             {
-                // opponent has played trump card
-                //if (context.CardsLeftInDeck == 0)
-                //{
                 // opponent has Ace and plays small trump => play trump 10
                 if (context.FirstPlayedCard.Type != CardType.Ace && this.cardTracker.FindRemainingCard(CardType.Ace, this.cardTracker.TrumpSuit) != null)
                 {

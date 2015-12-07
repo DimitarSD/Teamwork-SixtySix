@@ -23,7 +23,8 @@
             var sureCards = context.CardsLeftInDeck > 0 
                 ? this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay)
                 : this.cardTracker.GetSureCardsWhenGameClosed(context, this.possibleCardsToPlay, false);
- 
+
+            var test = this.possibleCardsToPlay;
             var asd = this.cardTracker.RemainingCards;
             if (sureCards.Count > 0)
             {
@@ -51,7 +52,7 @@
             if (card != null &&
                 (!this.cardValidator.HasTrumpCard(context, this.cardTracker.RemainingCards)
                 || this.GetHighestCardInSuit(this.cardTracker.RemainingCards, this.cardTracker.TrumpSuit).GetValue() < card.GetValue())
-                && this.cardTracker.MyTrickPoints + card.GetValue() >= 66)
+                && this.cardTracker.MyTrickPoints + card.GetValue() >= GlobalConstants.EnoughPointsToWinGame)
             {
                 return this.PlayCard(cards, card);
             }
@@ -114,7 +115,6 @@
 
         private Card GetPossibleSureCardsWhenGameClosed()
         {
-            // TODO: improve
             foreach (var myCard in this.possibleCardsToPlay)
             {
                 if (myCard.Type == CardType.Ace)

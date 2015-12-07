@@ -33,7 +33,7 @@
 
                 // play trump to win the round
                 card = this.GetHighestCardInSuit(this.possibleCardsToPlay, this.cardTracker.TrumpSuit);
-                if (card != null && this.cardTracker.MyTrickPoints >= 66 - (context.FirstPlayedCard.GetValue() + card.GetValue()))
+                if (card != null && this.cardTracker.MyTrickPoints >= GlobalConstants.EnoughPointsToWinGame - (context.FirstPlayedCard.GetValue() + card.GetValue()))
                 {
                     return this.PlayCard(cards, card);
                 }
@@ -57,7 +57,7 @@
                 }
 
                 // if opponent is close to the win => play high trump to get more than 33
-                if (this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() >= 50 && this.cardTracker.MyTrickPoints < 33)
+                if (this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() >= 50 && this.cardTracker.MyTrickPoints < GlobalConstants.EnoughPointsToLoseMinimumGamePoints)
                 {
                     card = this.GetHighestCardInSuit(this.possibleCardsToPlay, this.cardTracker.TrumpSuit);
                     if (card != null && !this.cardValidator.IsCardInAnnounce(context, card, this.possibleCardsToPlay, Announce.Forty))
@@ -67,7 +67,9 @@
                 }
 
                 // let opponent win of player can have forty by taking the last card in the deck
-                if (!this.cardValidator.IsTenOrAce(context.FirstPlayedCard) && context.CardsLeftInDeck == 2 && this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() < 50 && this.cardTracker.MyTrickPoints < 50
+                if (!this.cardValidator.IsTenOrAce(context.FirstPlayedCard) && context.CardsLeftInDeck == 2 
+                    && this.cardTracker.OpponentsTrickPoints + context.FirstPlayedCard.GetValue() < 50 
+                    && this.cardTracker.MyTrickPoints < 50
                     && (this.cardTracker.MyRemainingTrumpCards.Count >= 3
                     && ((context.TrumpCard.Type == CardType.Queen && this.cardValidator.HasTrumpCardType(context, cards, CardType.King))
                         || (context.TrumpCard.Type == CardType.King && this.cardValidator.HasTrumpCardType(context, cards, CardType.Queen)))
@@ -92,7 +94,7 @@
 
                     // play high trump if it will win the trick
                     card = this.GetHighestCardInSuit(this.possibleCardsToPlay, this.cardTracker.TrumpSuit);
-                    if (card != null && this.cardTracker.MyTrickPoints + context.FirstPlayedCard.GetValue() + card.GetValue() >= 66)
+                    if (card != null && this.cardTracker.MyTrickPoints + context.FirstPlayedCard.GetValue() + card.GetValue() >= GlobalConstants.EnoughPointsToWinGame)
                     {
                         return this.PlayCard(cards, card);
                     }

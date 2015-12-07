@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Logic.Cards;
     using Logic.Players;
     using Logic;
@@ -14,7 +12,6 @@
         private readonly ICollection<Card> remainingCards;
         private readonly ICollection<Card> playedCards;
         private readonly ICollection<Card> myRemainingTrumpCards;
-        //private readonly ICollection<Card> mySureCards;
         private readonly CardValidator cardValidator;
 
         public CardTracker()
@@ -23,7 +20,6 @@
             this.remainingCards = new List<Card>();
             this.playedCards = new HashSet<Card>();
             this.myRemainingTrumpCards = new List<Card>();
-            //this.mySureCards = new List<Card>();
             this.MyTrickPoints = 0;
             this.OpponentsTrickPoints = 0;
             this.cardValidator = new CardValidator();
@@ -52,15 +48,6 @@
                 return this.remainingCards;
             }
         }
-
-        //public ICollection<Card> MySureCards
-        //{
-        //    get
-        //    {
-        //        return this.mySureCards;
-        //    }
-        //}
-
 
         public void GetMyRemainingTrumpCards(ICollection<Card> myCards)
         {
@@ -223,19 +210,6 @@
         {
             this.myRemainingTrumpCards.Clear();
         }
-
-        //public void ClearMySureCards()
-        //{
-        //    this.mySureCards.Clear();
-        //}
-
-        //private void GetFullSuit(CardSuit suit)
-        //{
-        //    foreach (CardType type in Enum.GetValues(typeof(CardType)))
-        //    {
-        //        this.remainingCards.Add(new Card(suit, type));
-        //    }
-        //}
 
         public void GetFullDeck()
         {
